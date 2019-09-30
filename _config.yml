@@ -4,11 +4,11 @@
 
 # Site
 title: 凌风的博客
-subtitle: 耕耘前端，记录点滴
-description: 这是一个前端技术博客，记录着我对于前端学习的知识认知。
+subtitle: LinFun's Blog
+description: 代码如诗，记录点滴
 keywords: 前端, 凌风, 博客
 author: 凌风
-language: zh-cn
+language: zh-CN
 timezone:
 
 # URL
@@ -81,3 +81,10 @@ deploy:
   type: git
   branch: master
   repo: git@github.com:victorlizj/victorlizj.github.io.git
+
+# Search
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
