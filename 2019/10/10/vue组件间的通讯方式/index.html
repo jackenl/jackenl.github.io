@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="凌风的博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.0">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.4.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="组件式开发作为 Vue 框架的核心思想，在实际的项目开发中，开发者主要都是通过组件的形式进行开发。Vue 的每个组件实例都拥有独立函数作用域，实现组件与组件之间的数据通讯、共享状态，掌握各种组件的通讯方式，才能帮助我们在开发的过程中更加高效。下面将悉数展示所有 Vue 组件之间的通讯方式。">
+<meta name="keywords" content="前端,Vue">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vue组件通讯方式详解">
+<meta property="og:url" content="http://yoursite.com/2019/10/10/vue组件间的通讯方式/index.html">
+<meta property="og:site_name" content="凌风的博客">
+<meta property="og:description" content="组件式开发作为 Vue 框架的核心思想，在实际的项目开发中，开发者主要都是通过组件的形式进行开发。Vue 的每个组件实例都拥有独立函数作用域，实现组件与组件之间的数据通讯、共享状态，掌握各种组件的通讯方式，才能帮助我们在开发的过程中更加高效。下面将悉数展示所有 Vue 组件之间的通讯方式。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-10T07:14:28.716Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vue组件通讯方式详解">
+<meta name="twitter:description" content="组件式开发作为 Vue 框架的核心思想，在实际的项目开发中，开发者主要都是通过组件的形式进行开发。Vue 的每个组件实例都拥有独立函数作用域，实现组件与组件之间的数据通讯、共享状态，掌握各种组件的通讯方式，才能帮助我们在开发的过程中更加高效。下面将悉数展示所有 Vue 组件之间的通讯方式。">
+  <link rel="canonical" href="http://yoursite.com/2019/10/10/vue组件间的通讯方式/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Vue组件通讯方式详解 | 凌风的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凌风的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">LinFun's Blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+      </li>
+    
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/10/vue组件间的通讯方式/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="凌风">
+      <meta itemprop="description" content="代码如诗，记录点滴">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凌风的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Vue组件通讯方式详解
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2019-10-10 10:12:36 / 修改时间：15:14:28" itemprop="dateCreated datePublished" datetime="2019-10-10T10:12:36+08:00">2019-10-10</time>
+            </span>
+          
+            
+
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Vue-框架/" itemprop="url" rel="index"><span itemprop="name">Vue 框架</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span id="/2019/10/10/vue组件间的通讯方式/" class="post-meta-item leancloud_visitors" data-flag-title="Vue组件通讯方式详解" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2019/10/10/vue组件间的通讯方式/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2019/10/10/vue组件间的通讯方式/" itemprop="commentCount"></span></a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>组件式开发作为 Vue 框架的核心思想，在实际的项目开发中，开发者主要都是通过组件的形式进行开发。Vue 的每个组件实例都拥有独立函数作用域，实现组件与组件之间的数据通讯、共享状态，掌握各种组件的通讯方式，才能帮助我们在开发的过程中更加高效。下面将悉数展示所有 Vue 组件之间的通讯方式。</p>
+<a id="more"></a>
+
+<h2 id="组件通讯方式"><a href="#组件通讯方式" class="headerlink" title="组件通讯方式"></a>组件通讯方式</h2><hr>
+<h3 id="props-和-emit"><a href="#props-和-emit" class="headerlink" title="props 和 $emit"></a>props 和 $emit</h3><p>props 属性是最常用的父组件向子组件传值的属性，通过props属性传的值是所传属性的空间地址，当父组件该属性变换时，子组件也会自动变换。props 可以是数组或者对象，对象允许配置高级选项。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 简单语法</span><br><span class="line">props: [<span class="string">'size'</span>, <span class="string">'myMessage'</span>]</span><br><span class="line"></span><br><span class="line">// 对象语法</span><br><span class="line">props: &#123;</span><br><span class="line">  property: &#123;</span><br><span class="line">    <span class="built_in">type</span>: Number, // 传参限定类型</span><br><span class="line">    default: any, // 指定默认值</span><br><span class="line">    required: Boolean, // 定义是否微必填项</span><br><span class="line">    validator: Function, // 自定义验证函数</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>$emit 属性是最常用的子组件向父组件传值的属性，其作用是触发当前实例上的事件，同时附加参数传给监听器回调。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">// 子组件</span><br><span class="line">Vue.component(<span class="string">'magic-eight-ball'</span>, &#123;</span><br><span class="line">  data: <span class="function"><span class="title">function</span></span> () &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      possibleAdvice: [<span class="string">'Yes'</span>, <span class="string">'No'</span>, <span class="string">'Maybe'</span>]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    giveAdvice: <span class="function"><span class="title">function</span></span> () &#123;</span><br><span class="line">      var randomAdviceIndex = Math.floor(Math.random() * this.possibleAdvice.length)</span><br><span class="line">      this.<span class="variable">$emit</span>(<span class="string">'give-advice'</span>, this.possibleAdvice[randomAdviceIndex])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  template: `</span><br><span class="line">    &lt;button v-on:click=<span class="string">"giveAdvice"</span>&gt;</span><br><span class="line">      Click me <span class="keyword">for</span> advice</span><br><span class="line">    &lt;/button&gt;</span><br><span class="line">  `</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// 父组件</span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=<span class="string">"emit-example-argument"</span>&gt;</span><br><span class="line">    &lt;magic-eight-ball v-on:give-advice=<span class="string">"showAdvice"</span>&gt;&lt;magic-eight-ball&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">  new Vue(&#123;</span><br><span class="line">    el: <span class="string">'#emit-example-argument'</span>,</span><br><span class="line">    methods: &#123;</span><br><span class="line">      showAdvice: <span class="keyword">function</span> (advice) &#123;</span><br><span class="line">        alert(advice)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="v-model"><a href="#v-model" class="headerlink" title="v-model"></a>v-model</h3><p>众所周知，v-model 用于模板中输入框value值的数据双向绑定，但在组件中 v-model 则会等价于</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;custom-input</span><br><span class="line">  v-bind:value=<span class="string">"searchText"</span></span><br><span class="line">  v-on:input=<span class="string">"searchText = <span class="variable">$event</span>"</span></span><br><span class="line">&gt;&lt;/custom-input&gt;</span><br></pre></td></tr></table></figure>
+
+<p>为了让它正常工作，这个组件内的 &lt;input&gt; 必须：</p>
+<p>将其 value 特性绑定到一个名叫 value 的 prop 上<br>在其 input 事件被触发时，将新的值通过自定义的 input 事件抛出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 子组件</span><br><span class="line">Vue.component(<span class="string">'custom-input'</span>, &#123;</span><br><span class="line">  props: [<span class="string">'value'</span>],</span><br><span class="line">  template: `</span><br><span class="line">    &lt;input</span><br><span class="line">      v-bind:value=<span class="string">"value"</span></span><br><span class="line">      v-on:input=<span class="string">"<span class="variable">$emit</span>('input', <span class="variable">$event</span>.target.value)"</span></span><br><span class="line">    &gt;</span><br><span class="line">  `</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">父组件</span><br><span class="line">&lt;custom-input v-model=<span class="string">"searchText"</span>&gt;&lt;/custom-input&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="refs"><a href="#refs" class="headerlink" title="refs"></a>refs</h3><p>通过给子组件添加 ref 属性，然后通过该属性访问子组件实例。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 父组件</span><br><span class="line">&lt;home ref=<span class="string">"home"</span>/&gt;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">mounted</span></span>()&#123;</span><br><span class="line">  console.log(this.<span class="variable">$refs</span>.home) //即可拿到子组件的实例,就可以直接操作 data 和 methods</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="sync"><a href="#sync" class="headerlink" title=".sync"></a>.sync</h3><p>在 <a href="mailto:vue@1.x" target="_blank" rel="noopener">vue@1.x</a> 的时候曾作为双向绑定功能存在，即子组件可以修改父组件中的值; 在 <a href="mailto:vue@2.0" target="_blank" rel="noopener">vue@2.0</a> 的由于违背单项数据流的设计被干掉了; 在 <a href="mailto:vue@2.3.0" target="_blank" rel="noopener">vue@2.3.0</a>+ 以上版本又重新引入了这个 .sync 修饰符。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 父组件</span><br><span class="line">&lt;home :title.sync=<span class="string">"title"</span> /&gt;</span><br><span class="line">//编译时会被扩展为</span><br><span class="line">&lt;home :title=<span class="string">"title"</span>  @update:title=<span class="string">"val =&gt; title = val"</span>/&gt;</span><br><span class="line"></span><br><span class="line">// 子组件</span><br><span class="line">// 所以子组件可以通过<span class="variable">$emit</span> 触发 update 方法改变</span><br><span class="line"><span class="function"><span class="title">mounted</span></span>()&#123;</span><br><span class="line">  this.<span class="variable">$emit</span>(<span class="string">"update:title"</span>, <span class="string">'这是新的title'</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="attrs-和-listeners"><a href="#attrs-和-listeners" class="headerlink" title="$attrs 和 $listeners"></a>$attrs 和 $listeners</h3><p>$attrs 包含了父作用域中不作为 prop 被识别 (且获取) 的特性绑定 (class 和 style 除外)。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind=”$attrs” 传入内部组件——在创建高级别的组件时非常有用。</p>
+<p>$listeners 包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。它可以通过 v-on=”$listeners” 传入内部组件——在创建更高层次的组件时非常有用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">// 组件A</span><br><span class="line">Vue.component(<span class="string">'A'</span>, &#123;</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;p&gt;this is parent component!&lt;/p&gt;</span><br><span class="line">      &lt;B :messagec=<span class="string">"messagec"</span> :message=<span class="string">"message"</span> v-on:getCData=<span class="string">"getCData"</span> v-on:getChildData=<span class="string">"getChildData(message)"</span>&gt;&lt;/B&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      message: <span class="string">'hello'</span>,</span><br><span class="line">      messagec: <span class="string">'hello c'</span> //传递给c组件的数据</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    // 执行B子组件触发的事件</span><br><span class="line">    getChildData(val) &#123;</span><br><span class="line">      console.log(`这是来自B组件的数据：<span class="variable">$&#123;val&#125;</span>`);</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    // 执行C子组件触发的事件</span><br><span class="line">    getCData(val) &#123;</span><br><span class="line">      console.log(`这是来自C组件的数据：<span class="variable">$&#123;val&#125;</span>`);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 组件B</span><br><span class="line">Vue.component(<span class="string">'B'</span>, &#123;</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;input <span class="built_in">type</span>=<span class="string">"text"</span> v-model=<span class="string">"mymessage"</span> @input=<span class="string">"passData(mymessage)"</span>&gt;</span><br><span class="line">      &lt;!-- C组件中能直接触发 getCData 的原因在于：B组件调用 C组件时，使用 v-on 绑定了 <span class="variable">$listeners</span> 属性 --&gt;</span><br><span class="line">      &lt;!-- 通过v-bind 绑定 <span class="variable">$attrs</span> 属性，C组件可以直接获取到 A组件中传递下来的 props（除了 B组件中 props声明的） --&gt;</span><br><span class="line">      &lt;C v-bind=<span class="string">"<span class="variable">$attrs</span>"</span> v-on=<span class="string">"<span class="variable">$listeners</span>"</span>&gt;&lt;/C&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  /**</span><br><span class="line">   * 得到父组件传递过来的数据</span><br><span class="line">   * 这里的定义最好是写成数据校验的形式，免得得到的数据是我们意料之外的</span><br><span class="line">   *</span><br><span class="line">   * props: &#123;</span><br><span class="line">   *   message: &#123;</span><br><span class="line">   *     <span class="built_in">type</span>: String,</span><br><span class="line">   *     default: <span class="string">''</span></span><br><span class="line">   *   &#125;</span><br><span class="line">   * &#125;</span><br><span class="line">   *</span><br><span class="line">  */</span><br><span class="line">  props: [<span class="string">'message'</span>],</span><br><span class="line">  <span class="function"><span class="title">data</span></span>()&#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      mymessage: this.message</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    passData(val)&#123;</span><br><span class="line">      //触发父组件中的事件</span><br><span class="line">      this.<span class="variable">$emit</span>(<span class="string">'getChildData'</span>, val)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 组件C</span><br><span class="line">Vue.component(<span class="string">'C'</span>, &#123;</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;input <span class="built_in">type</span>=<span class="string">"text"</span> v-model=<span class="string">"<span class="variable">$attrs</span>.messagec"</span> @input=<span class="string">"passCData(<span class="variable">$attrs</span>.messagec)"</span>&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    passCData(val) &#123;</span><br><span class="line">      // 触发父组件A中的事件</span><br><span class="line">      this.<span class="variable">$emit</span>(<span class="string">'getCData'</span>,val)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">var app=new Vue(&#123;</span><br><span class="line">  el:<span class="string">'#app'</span>,</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;A /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="parent-和-children"><a href="#parent-和-children" class="headerlink" title="$parent 和 $children"></a>$parent 和 $children</h3><p>$parent 属性指向的父实例，通过 this.$parent.property 可以范围父实例的所有属性，但是会导致组件无法进行复用，不建议使用。</p>
+<p>$children 属性指向当前实例的直接子组件数组，需要注意 $children 并不保证顺序，也不是响应式的。</p>
+<blockquote>
+<p>提示：这两个属性不利于实现组件的复用，所以不建议使用。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">// 定义 parent 组件</span><br><span class="line">Vue.component(<span class="string">'parent'</span>, &#123;</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;p&gt;this is parent component!&lt;/p&gt;</span><br><span class="line">      &lt;button @click=<span class="string">"changeChildValue"</span>&gt;<span class="built_in">test</span>&lt;/button&gt;</span><br><span class="line">      &lt;child /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      message: <span class="string">'hello'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    <span class="function"><span class="title">changeChildValue</span></span>()&#123;</span><br><span class="line">      this.<span class="variable">$children</span>[0].mymessage = <span class="string">'hello'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 定义 child 组件</span><br><span class="line">Vue.component(<span class="string">'child'</span>, &#123;</span><br><span class="line">  template:`</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;input <span class="built_in">type</span>=<span class="string">"text"</span> v-model=<span class="string">"mymessage"</span> @change=<span class="string">"changeValue"</span> /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      mymessage: this.<span class="variable">$parent</span>.message</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    <span class="function"><span class="title">changeValue</span></span>()&#123;</span><br><span class="line">      this.<span class="variable">$parent</span>.message = this.mymessage;//通过如此调用可以改变父组件的值</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">const app = new Vue(&#123;</span><br><span class="line">  el: <span class="string">'#app'</span>,</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;parent /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="中央事件总线-EventBus"><a href="#中央事件总线-EventBus" class="headerlink" title="中央事件总线 EventBus"></a>中央事件总线 EventBus</h3><p>当需要实现兄弟组件间通讯，并且项目规模不大的情况下，我们可以通过使用中央事件总线 EventBus 的方式实现。</p>
+<p>EventBus 通过新建一个 Vue 事件 bus 对象，然后通过 bus.$emit 触发事件，bus.$on 监听触发的事件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">// 组件 A</span><br><span class="line">Vue.component(<span class="string">'A'</span>, &#123;</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;p&gt;this is A component!&lt;/p&gt;</span><br><span class="line">      &lt;input <span class="built_in">type</span>=<span class="string">"text"</span> v-model=<span class="string">"mymessage"</span> @input=<span class="string">"passData(mymessage)"</span>&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      mymessage: <span class="string">'hello brother1'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    passData(val) &#123;</span><br><span class="line">      //触发全局事件globalEvent</span><br><span class="line">      this.<span class="variable">$EventBus</span>.<span class="variable">$emit</span>(<span class="string">'globalEvent'</span>, val)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 组件 B</span><br><span class="line">Vue.component(<span class="string">'B'</span>, &#123;</span><br><span class="line">  template:`</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;p&gt;this is B component!&lt;/p&gt;</span><br><span class="line">      &lt;p&gt;组件A 传递过来的数据：&#123;&#123;brothermessage&#125;&#125;&lt;/p&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `,</span><br><span class="line">  <span class="function"><span class="title">data</span></span>() &#123;</span><br><span class="line">    <span class="built_in">return</span> &#123;</span><br><span class="line">      mymessage: <span class="string">'hello brother2'</span>,</span><br><span class="line">      brothermessage: <span class="string">''</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="title">mounted</span></span>() &#123;</span><br><span class="line">    //绑定全局事件globalEvent</span><br><span class="line">    this.<span class="variable">$EventBus</span>.<span class="variable">$on</span>(<span class="string">'globalEvent'</span>, (val) =&gt; &#123;</span><br><span class="line">      this.brothermessage = val;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">//定义中央事件总线</span><br><span class="line">const EventBus = new Vue();</span><br><span class="line"></span><br><span class="line">// 将中央事件总线赋值到 Vue.prototype 上，这样所有组件都能访问到了</span><br><span class="line">Vue.prototype.<span class="variable">$EventBus</span> = EventBus;</span><br><span class="line"></span><br><span class="line">const app = new Vue(&#123;</span><br><span class="line">  el: <span class="string">'#app'</span>,</span><br><span class="line">  template: `</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;A /&gt;</span><br><span class="line">      &lt;B /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  `</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="provide-和-inject"><a href="#provide-和-inject" class="headerlink" title="provide 和 inject"></a>provide 和 inject</h3><p>这对选项需要一起使用，以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，并在起上下游关系成立的时间里始终生效。</p>
+<p>provide 选项应该是一个对象或返回一个对象的函数。该对象包含可注入其子孙的属性。</p>
+<p>inject 选项应该是一个数组或一个对象</p>
+<blockquote>
+<p>提示：provide 和 inject 绑定并不是可响应的。这是刻意为之的。然而，如果你传入了一个可监听的对象，那么其对象的属性还是可响应的。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// 父级组件提供 <span class="string">'foo'</span></span><br><span class="line">var Provider = &#123;</span><br><span class="line">  provide: &#123;</span><br><span class="line">    foo: <span class="string">'bar'</span></span><br><span class="line">  &#125;,</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 子组件注入 <span class="string">'foo'</span></span><br><span class="line">var Child = &#123;</span><br><span class="line">  inject: [<span class="string">'foo'</span>],</span><br><span class="line">  <span class="function"><span class="title">created</span></span> () &#123;</span><br><span class="line">    console.log(this.foo) // =&gt; <span class="string">"bar"</span></span><br><span class="line">  &#125;</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="boradcast-和-dispatch"><a href="#boradcast-和-dispatch" class="headerlink" title="$boradcast 和 $dispatch"></a>$boradcast 和 $dispatch</h3><p>这也是一对成对出现的方法，不过只是在 Vue1.0 中提供了，而 Vue2.0 被废弃了，废话不多说，直接上代码。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">// broadcast 方法的主逻辑处理方法</span><br><span class="line"><span class="keyword">function</span> broadcast(componentName, eventName, params) &#123;</span><br><span class="line">  this.<span class="variable">$children</span>.forEach(child =&gt; &#123;</span><br><span class="line">    const name = child.<span class="variable">$options</span>.componentName;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name === componentName) &#123;</span><br><span class="line">      child.<span class="variable">$emit</span>.apply(child, [eventName].concat(params));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      broadcast.apply(child, [componentName, eventName].concat(params));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> default &#123;</span><br><span class="line">  methods: &#123;</span><br><span class="line">    // 定义 dispatch 方法</span><br><span class="line">    dispatch(componentName, eventName, params) &#123;</span><br><span class="line">      <span class="built_in">let</span> parent = this.<span class="variable">$parent</span>;</span><br><span class="line">      <span class="built_in">let</span> name = parent.<span class="variable">$options</span>.componentName;</span><br><span class="line">      <span class="keyword">while</span> (parent &amp;&amp; (!name || name !== componentName)) &#123;</span><br><span class="line">        parent = parent.<span class="variable">$parent</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (parent) &#123;</span><br><span class="line">          name = parent.<span class="variable">$options</span>.componentName;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (parent) &#123;</span><br><span class="line">        parent.<span class="variable">$emit</span>.apply(parent, [eventName].concat(params));</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    // 定义 broadcast 方法</span><br><span class="line">    broadcast(componentName, eventName, params) &#123;</span><br><span class="line">      broadcast.call(this, componentName, eventName, params);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>上面所示的代码，一般都作为一个 mixins 去混入使用, broadcast 是向特定的父组件触发事件，dispatch 是向特定的子组件触发事件，本质上这种方式还是 on 和 emit 的封装，在一些基础组件中都很实用。</p>
+<h3 id="Vuex-状态管理"><a href="#Vuex-状态管理" class="headerlink" title="Vuex 状态管理"></a>Vuex 状态管理</h3><p>Vuex 是状态管理工具，实现了项目状态的集中式管理。工具的实现借鉴了 Flux、Redux、和 The Elm Architecture 的模式和概念。当然与其他模式不同的是，Vuex 是专门为 Vue.js 设计的状态管理库，以利用 Vue.js 的细粒度数据响应机制来进行高效的状态更新。详细的关于 Vuex 的介绍，请查看<a href="https://vuex.vuejs.org/zh/" target="_blank" rel="noopener">官网文档</a></p>
+<h3 id="vue-router-路由传参"><a href="#vue-router-路由传参" class="headerlink" title="vue-router 路由传参"></a>vue-router 路由传参</h3><p>当需要实现跨路由地址的传参时，我们可以通过 vue-router 官方提供给我我们的传参方案实现组件通讯，详情请查看<a href="https://router.vuejs.org/zh/guide/essentials/passing-props.html#%E5%B8%83%E5%B0%94%E6%A8%A1%E5%BC%8F" target="_blank" rel="noopener">官方文档</a></p>
+<h3 id="Vue-observable"><a href="#Vue-observable" class="headerlink" title="Vue.observable"></a>Vue.observable</h3><p>2.6.0 新增<br>用法:让一个对象可响应。Vue 内部会用它来处理 data 函数返回的对象;<br>返回的对象可以直接用于渲染函数和计算属性内，并且会在发生改变时触发相应的更新;<br>也可以作为最小化的跨组件状态存储器，用于简单的场景。<br>通讯原理实质上是利用Vue.observable实现一个简易的 vuex</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">// 文件路径 - /store/store.js</span><br><span class="line">import Vue from <span class="string">'vue'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> const store = Vue.observable(&#123; count: 0 &#125;)</span><br><span class="line"><span class="built_in">export</span> const mutations = &#123;</span><br><span class="line">  setCount (count) &#123;</span><br><span class="line">    store.count = count</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//使用</span><br><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;label <span class="keyword">for</span>=<span class="string">"bookNum"</span>&gt;数 量&lt;/label&gt;</span><br><span class="line">            &lt;button @click=<span class="string">"setCount(count+1)"</span>&gt;+&lt;/button&gt;</span><br><span class="line">            &lt;span&gt;&#123;&#123;count&#125;&#125;&lt;/span&gt;</span><br><span class="line">            &lt;button @click=<span class="string">"setCount(count-1)"</span>&gt;-&lt;/button&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">import &#123; store, mutations &#125; from <span class="string">'../store/store'</span> // Vue2.6新增API Observable</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> default &#123;</span><br><span class="line">  name: <span class="string">'Add'</span>,</span><br><span class="line">  computed: &#123;</span><br><span class="line">    <span class="function"><span class="title">count</span></span> () &#123;</span><br><span class="line">      <span class="built_in">return</span> store.count</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    setCount: mutations.setCount</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是 Vue 组件通讯的详细方案说明，涵盖了从 Vue1.0 到 Vue2.6 几乎所有的通讯方案，其中 Vue.observable 将在 Vue3.0 被 reative API所替代，向查看更多更新请查看 <a href="https://vue-composition-api-rfc.netlify.com/" target="_blank" rel="noopener">Vue Composition API</a>，同时我们还可以通过浏览器本地存储的方式进行组件通讯。</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/前端/" rel="tag"># 前端</a>
+            
+              <a href="/tags/Vue/" rel="tag"># Vue</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2019/09/30/javascript继承方法总结/" rel="next" title="javascript继承方法总结">
+                  <i class="fa fa-chevron-left"></i> javascript继承方法总结
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="comments"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#组件通讯方式"><span class="nav-number">1.</span> <span class="nav-text">组件通讯方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#props-和-emit"><span class="nav-number">1.1.</span> <span class="nav-text">props 和 $emit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#v-model"><span class="nav-number">1.2.</span> <span class="nav-text">v-model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#refs"><span class="nav-number">1.3.</span> <span class="nav-text">refs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync"><span class="nav-number">1.4.</span> <span class="nav-text">.sync</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#attrs-和-listeners"><span class="nav-number">1.5.</span> <span class="nav-text">$attrs 和 $listeners</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parent-和-children"><span class="nav-number">1.6.</span> <span class="nav-text">$parent 和 $children</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中央事件总线-EventBus"><span class="nav-number">1.7.</span> <span class="nav-text">中央事件总线 EventBus</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#provide-和-inject"><span class="nav-number">1.8.</span> <span class="nav-text">provide 和 inject</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#boradcast-和-dispatch"><span class="nav-number">1.9.</span> <span class="nav-text">$boradcast 和 $dispatch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vuex-状态管理"><span class="nav-number">1.10.</span> <span class="nav-text">Vuex 状态管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vue-router-路由传参"><span class="nav-number">1.11.</span> <span class="nav-text">vue-router 路由传参</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vue-observable"><span class="nav-number">1.12.</span> <span class="nav-text">Vue.observable</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image"
+      src="/images/avatar.jpg"
+      alt="凌风">
+  <p class="site-author-name" itemprop="name">凌风</p>
+  <div class="site-description" itemprop="description">代码如诗，记录点滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/victorlizj" title="GitHub &rarr; https://github.com/victorlizj" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:victorzjli@gmail.com" title="邮箱 &rarr; mailto:victorzjli@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>邮箱</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">凌风</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v7.4.0</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.0"></script><script src="/js/motion.js?v=7.4.0"></script>
+<script src="/js/schemes/pisces.js?v=7.4.0"></script>
+<script src="/js/next-boot.js?v=7.4.0"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.4.0"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'cJ8SATzOsdPDlSidwklSnXuQ-gzGzoHsz',
+    appKey: 'QNjD45U5bswBLrDJVxSSexL0',
+    placeholder: '留下您的足迹~~~///(^v^)\\\~~~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: true,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>
