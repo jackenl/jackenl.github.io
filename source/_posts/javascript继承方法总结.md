@@ -4,7 +4,7 @@ date: 2019-09-30 16:21:21
 tags:
 - 前端
 - javascript
-categories: web前端
+categories: Javascript
 ---
 
 继承是 OOP 语言中一个比较重要的概念，继承可以使得子类具有父类的属性和方法或者重新定义、新追加属性和方法等，由于 Javascript 语言没有真正的对象类，所以其实现继承的方法相对而言会比较特殊，实现继承主要是依靠原型链来实现的。
