@@ -1,4 +1,4 @@
-const bubbleSort = require('../bubbleSort')
+const insertSort = require('../insertSort')
 const random = require('../../../utils/random')
 
 let arr = []
@@ -8,5 +8,4 @@ while (arr.length < 10000) {
     arr.push(value)
   }
 }
-
-console.log(bubbleSort(arr))
+console.log(insertSort(arr))
